@@ -64,6 +64,20 @@ Mac OS X
 
 - Open the bitcoin-qt.pro file in Qt Creator and build as normal (cmd-B)
 
+Alternative way:
+
+- Get Qt from Homebrew, not from Macports or the official website
+
+    brew install qt
+
+- Ask macports to install boost and other dependencies with tag +universal
+
+    sudo port install boost +universal
+
+- Then just use qmake and make to compile (as described everywhere)
+
+Thanks to http://stackoverflow.com/a/20661213
+
 .. _`Qt Mac OS X SDK`: http://qt.nokia.com/downloads/sdk-mac-os-cpp
 .. _`MacPorts`: http://www.macports.org/install.php
 
