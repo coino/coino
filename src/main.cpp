@@ -1,6 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Copyright (c) 2011-2013 Coino Developers.
+// Copyright (c) 2014 Coino Community Developers.
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -887,7 +888,7 @@ double	EventHorizonDeviationFast;
 double	EventHorizonDeviationSlow;
 
     if (BlockLastSolved == NULL || BlockLastSolved->nHeight == 0 || (uint64)BlockLastSolved->nHeight < PastBlocksMin) { return bnProofOfWorkLimit.GetCompact(); }
-
+       int64 LatestBlockTime = BlockLastSolved->GetBlockTime();
 for (unsigned int i = 1; BlockReading && BlockReading->nHeight > 0; i++) {
 if (PastBlocksMax > 0 && i > PastBlocksMax) { break; }
 PastBlocksMass++;
@@ -896,10 +897,21 @@ if (i == 1)	{ PastDifficultyAverage.SetCompact(BlockReading->nBits); }
 else	{ PastDifficultyAverage = ((CBigNum().SetCompact(BlockReading->nBits) - PastDifficultyAveragePrev) / i) + PastDifficultyAveragePrev; }
 PastDifficultyAveragePrev = PastDifficultyAverage;
 
-PastRateActualSeconds	= BlockLastSolved->GetBlockTime() - BlockReading->GetBlockTime();
+               if (LatestBlockTime < BlockReading->GetBlockTime()) {
+                       if (BlockReading->nHeight > 269707) // HARD Fork block number
+                               LatestBlockTime = BlockReading->GetBlockTime();
+               }
+               PastRateActualSeconds                   = LatestBlockTime - BlockReading->GetBlockTime();
+
 PastRateTargetSeconds	= TargetBlocksSpacingSeconds * PastBlocksMass;
 PastRateAdjustmentRatio	= double(1);
-if (PastRateActualSeconds < 0) { PastRateActualSeconds = 0; }
+
+               if (BlockReading->nHeight > 269707) { // HARD Fork block number
+                       if (PastRateActualSeconds < 1) { PastRateActualSeconds = 1; }
+               } else {
+                       if (PastRateActualSeconds < 0) { PastRateActualSeconds = 0; }
+               }
+
 if (PastRateActualSeconds != 0 && PastRateTargetSeconds != 0) {
 PastRateAdjustmentRatio	= double(PastRateTargetSeconds) / double(PastRateActualSeconds);
 }
@@ -939,6 +951,7 @@ if (pindexLast->nHeight+1 > 157250)
 	static const int64	BlocksTargetSpacing	= 25 * 1;
 	unsigned int	TimeDaySeconds	= 60 * 60 * 24;
 	int64	PastSecondsMin	= TimeDaySeconds * 0.0417;
+        if (pindexLast->nHeight > 269707) PastSecondsMin = TimeDaySeconds/6; // 4 hours
 	int64	PastSecondsMax	= TimeDaySeconds * 1.17;
 	uint64	PastBlocksMin	= PastSecondsMin / BlocksTargetSpacing;
 	uint64	PastBlocksMax	= PastSecondsMax / BlocksTargetSpacing;	
