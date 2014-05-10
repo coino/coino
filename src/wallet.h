@@ -12,6 +12,7 @@
 #include "keystore.h"
 #include "script.h"
 #include "ui_interface.h"
+#include <boost/algorithm/string.hpp>
 
 class CWalletTx;
 class CReserveKey;

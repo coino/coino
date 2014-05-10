@@ -2,6 +2,7 @@
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Copyright (c) 2011-2012 Litecoin Developers
 // Copyright (c) 2013 Coino Developers
+// Copyright (c) 2014 Coino Community Team
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -392,6 +393,17 @@ bool CWallet::AddToWallet(const CWalletTx& wtxIn)
 
         // Notify UI of new or updated transaction
         NotifyTransactionChanged(this, hash, fInsertedNew ? CT_NEW : CT_UPDATED);
+
+
+        std::string strCmd = GetArg("-walletnotify", "");
+
+        if( !strCmd.empty())
+        {
+                boost::replace_all(strCmd, "%s", wtxIn.GetHash().GetHex());
+                boost::thread t(runCommand, strCmd);    // Thread runs free
+        }
+
+
     }
     return true;
 }
